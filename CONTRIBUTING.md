@@ -44,7 +44,7 @@ In the interest of fostering an open and welcoming environment, we as contributo
 
 Have a question, idea, or a suggestion for the website? Have you noticed a bug or found a way to improve the project? 
 
-Before doing anything else, review the [existing issues](https://github.com/brrkrmn/codeandline-frontend/issues) and [closed ones](https://github.com/brrkrmn/codeandline-frontend/issues?q=is%3Aissue+is%3Aclosed) to see if anyone else opened an issue for what you have in mind.
+Before doing anything else, review the [existing issues](https://github.com/brrkrmn/codeandline-backend/issues) and [closed ones](https://github.com/brrkrmn/codeandline-backend/issues?q=is%3Aissue+is%3Aclosed) to see if anyone else opened an issue for what you have in mind.
 1. If such an issue is still open, **do not open a new issue**, read the discussion in the existing one and add your comments if you think it will provide a good perspective on the topic.
 2. If such an issue is closed, read the discussion and if you think that it is necessary to bring the issue back to life, create a new issue with the **label: duplicate**.
 3. If there's not such an issue, create one!
@@ -53,7 +53,7 @@ If you're ready to create an issue, here's a checklist for you to follow:
 
 ### Creating the issue
 1. ⚠️ Apply the appropriate label for the issue
-   > See the descriptions of the [project's labels](https://github.com/brrkrmn/codeandline-frontend/labels) to pick the perfect one for your issue.
+   > See the descriptions of the [project's labels](https://github.com/brrkrmn/codeandline-backend/labels) to pick the perfect one for your issue.
 3. Write a short descriptive title
 4. For the description of the issue:
    - Summarize the issue in a few sentences.

@@ -1,15 +1,12 @@
 const User = require('../models/user')
+const Folder = require('../models/folder')
+const Note = require('../models/note')
 const bcrypt = require('bcrypt')
 
-const createFirstUser = async () => {
+const initializeUser = async () => {
   const passwordHash = await bcrypt.hash('firstPassword', 10)
   const firstUser = new User({ username: 'firstUser', email: 'firstUser@test.com', passwordHash: passwordHash })
   await firstUser.save()
-}
-
-const getUsersInDB = async () => {
-  const users = await User.find({})
-  return users.map(user => user.toJSON())
 }
 
 const isUserInDB = async (username) => {
@@ -17,6 +14,12 @@ const isUserInDB = async (username) => {
   if (user) return true; else false
 }
 
+const clearDB = async () => {
+  await Folder.deleteMany({})
+  await Note.deleteMany({})
+  await User.deleteMany({})
+}
+
 module.exports = {
-  createFirstUser, getUsersInDB, isUserInDB
+  initializeUser, isUserInDB, clearDB
 }

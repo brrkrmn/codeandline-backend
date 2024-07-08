@@ -9,7 +9,11 @@ const api = supertest(app)
 describe('login', () => {
   beforeEach(async () => {
     await User.deleteMany({})
-    await helper.createFirstUser()
+    await helper.initializeUser()
+  })
+
+  afterEach(async () => {
+    await helper.clearDB()
   })
 
   describe('with correct username and password', () => {
@@ -70,4 +74,8 @@ describe('login', () => {
     expect(response.text).toContain("Invalid username or password")
 
   })
+})
+
+afterAll(async () => {
+  await mongoose.connection.close()
 })

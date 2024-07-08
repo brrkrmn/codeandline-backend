@@ -9,7 +9,11 @@ const api = supertest(app)
 describe('signup', () => {
   beforeEach(async () => {
     await User.deleteMany({})
-    await helper.createFirstUser()
+    await helper.initializeUser()
+  })
+
+  afterEach(async () => {
+    await helper.clearDB()
   })
 
   test('succeeds with unique credentials', async () => {

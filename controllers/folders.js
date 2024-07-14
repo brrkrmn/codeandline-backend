@@ -16,7 +16,7 @@ foldersRouter.get('/:id', async (request, response) => {
   if (folder.user.id === user.id) {
     response.json(folder)
   } else {
-    response.status(404).end()
+    response.status(403).json({ error: 'Unauthorized' })
   }
 })
 
@@ -70,7 +70,7 @@ foldersRouter.put('/:id', async (request, response) => {
   }
 
   const updatedFolder = await Folder.findByIdAndUpdate(request.params.id, newFolder, { new: true })
-  response.json(updatedFolder)
+  response.status(200).json(updatedFolder)
 })
 
 module.exports = foldersRouter

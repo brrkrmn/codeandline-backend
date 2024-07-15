@@ -27,8 +27,6 @@ app.use(cors());
 
 app.use(middleware.requestLogger)
 
-app.get("/", (req, res) => res.send("Express on Vercel"));
-
 app.use('/api/signup', signupRouter)
 app.use('/api/login', loginRouter)
 app.use('/api/notes', middleware.tokenExtractor, middleware.userExtractor, notesRouter)

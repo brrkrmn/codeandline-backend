@@ -7,7 +7,7 @@
     "build": "",
     "start": "cross-env NODE_ENV=production node index.js",
     "dev": "cross-env NODE_ENV=development nodemon ./api/index.js",
-    "test": "cross-env NODE_ENV=test jest --verbose --runInBand"
+    "test": "cross-env NODE_ENV=test jest --verbose --runInBand --coverage"
   },
   "author": "",
   "license": "ISC",
@@ -29,6 +29,7 @@
   },
   "jest": {
    "testEnvironment": "node",
-   "globalTeardown": "./tests/teardown.js"
+   "globalTeardown": "./tests/teardown.js",
+   "testTimeout": 100000
  }
 }

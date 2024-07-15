@@ -57,7 +57,7 @@ describe('login', () => {
 
     expect(response.text).toContain("Invalid username or password")
 
-  }, 100000)
+  })
 
   test('fails with nonexisting username', async () => {
     const user = {

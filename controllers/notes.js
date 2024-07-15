@@ -18,7 +18,7 @@ notesRouter.get('/:id', async (request, response) => {
   if (note.user.id === user.id) {
     response.json(note)
   } else {
-    response.status(404).end()
+    response.status(403).json({ error: 'Unauthorized' })
   }
 })
 
@@ -112,7 +112,7 @@ notesRouter.put('/:id', folderExtractor, async (request, response) => {
     }
   }
 
-  response.json(updatedNote)
+  response.status(200).json(updatedNote)
 })
 
 module.exports = notesRouter

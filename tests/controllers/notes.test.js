@@ -2,17 +2,19 @@ const mongoose = require('mongoose')
 const supertest = require('supertest')
 const helper = require('../helper')
 const app = require('../../app')
-const Folder = require('../../models/folder')
+const User = require('../../models/user')
+const Note = require('../../models/note')
+const bcrypt = require('bcrypt')
 
 const api = supertest(app)
 
 describe('authenticated user', () => {
   let token
-  let firstFolder
+  let firstNote
 
   beforeEach(async () => {
     await helper.initializeUser()
-    await helper.initializeFolder()
+    await helper.initializeNote()
 
     const response = await api
       .post('/api/login')
@@ -22,16 +24,16 @@ describe('authenticated user', () => {
       })
 
     token = response.body.token
-    firstFolder = await Folder.findOne({})
+    firstNote = await Note.findOne({})
   })
 
   afterEach(async () => {
     await helper.clearDB()
   })
 
-  test('succeeds to view all folders', async () => {
+  test('succeeds to view all notes', async () => {
     const response = await api
-      .get('/api/folders')
+      .get('/api/notes')
       .set('Authorization', `Bearer ${token}`)
       .expect(200)
       .expect('Content-Type', /application\/json/)
@@ -39,39 +41,44 @@ describe('authenticated user', () => {
     expect(response.body).toHaveLength(1)
   })
 
-  test('succeeds to view folder details', async () => {
+  test('succeeds to view note details', async () => {
     const response = await api
-      .get(`/api/folders/${firstFolder.id}`)
+      .get(`/api/notes/${firstNote.id}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    expect(response.body.id).toBe(firstFolder.id)
+    expect(response.body.id).toBe(firstNote.id)
   })
 
-  test('succeeds to create folder', async () => {
+  test('succeeds to create note', async () => {
     await api
-      .post('/api/folders')
+      .post('/api/notes')
       .set('Authorization', `Bearer ${token}`)
       .send({
-        title: 'newFolder',
+        title: 'newNote',
+        code: "new code line",
+        entries: [{
+          lineNumbers: [1, 2],
+          content: "new content for lines 1 and 2."
+        }],
       })
       .expect(201)
       .expect('Content-Type', /application\/json/)
   })
 
-  test('succeds to delete folder', async () => {
+  test('succeeds to delete note', async () => {
     await api
-      .delete(`/api/folders/${firstFolder.id}`)
+      .delete(`/api/notes/${firstNote.id}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(204)
   })
 
-  test('succeeds to edit folder', async () => {
+  test('succeeds to edit note', async () => {
     await api
-      .put(`/api/folders/${firstFolder.id}`)
+      .put(`/api/notes/${firstNote.id}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({title: 'newTitle', description: 'newDescription'})
+      .send({ title: 'newTitle', description: 'newDescription', code: 'new code line' })
       .expect(200)
       .expect('Content-Type', /application\/json/)
       .then(res => expect(res.body.title).toContain('newTitle'));

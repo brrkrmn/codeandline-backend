@@ -29,6 +29,34 @@ const initializeFolder = async () => {
   await firstFolder.save()
 }
 
+const initializeNote = async () => {
+  const user = await User.findOne({})
+  const firstNote = new Note({
+    title: 'firstNote',
+    description: 'firstNoteDescription',
+    code: "First code line",
+    entries: [
+      {
+        lineNumbers: [1, 2],
+        content: "First content for lines 1 and 2."
+      }
+    ],
+    user: user.id,
+  })
+  await firstNote.save()
+}
+
+const createNewUser = async () => {
+  const passwordHash = await bcrypt.hash('newPassword', 10)
+  const newUser = new User({
+    username: 'newUser',
+    email: 'newUser@test.com',
+    passwordHash: passwordHash
+  })
+  const savedUser = await newUser.save()
+  return savedUser
+}
+
 const clearDB = async () => {
   await Folder.deleteMany({})
   await Note.deleteMany({})
@@ -36,5 +64,5 @@ const clearDB = async () => {
 }
 
 module.exports = {
-  initializeUser, isUserInDB, initializeFolder, clearDB
+  initializeUser, isUserInDB, initializeFolder, initializeNote, createNewUser, clearDB
 }

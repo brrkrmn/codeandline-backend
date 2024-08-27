@@ -61,6 +61,9 @@ export const userExtractor = async (req: Request, res: Response, next: NextFunct
 
   const user = await User.findById(decodedToken.id)
 
+  if (!user) {
+    return res.status(401).json({ error: 'unauthorized' })
+  }
   req.user = user
 
   next()

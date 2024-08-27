@@ -1,12 +1,13 @@
 import { Request, Response, Router } from 'express';
-import { Folder } from '../models/folder';
-import { Note } from '../models/note';
+import { Folder, FolderDocument } from '../models/folder';
+import { Note, NoteDocument } from '../models/note';
+import { User, UserDocument } from '../models/user';
 import { folderExtractor } from '../utils/middleware';
 
 const notesRouter = Router();
 
 notesRouter.get('/', async (req: Request, res: Response) => {
-  const user = req.user
+  const user = req.user as UserDocument
   const userNotes = await Note
     .find({ user: user._id }).populate('user').populate('folder')
 
@@ -14,8 +15,8 @@ notesRouter.get('/', async (req: Request, res: Response) => {
 })
 
 notesRouter.get('/:id', async (req: Request, res: Response) => {
-  const note = await Note.findById(req.params.id).populate('user').populate('folder')
-  const user = req.user
+  const note = await Note.findById(req.params.id).populate('user').populate('folder') as NoteDocument
+  const user = req.user as UserDocument
 
   if (note.user.id === user.id) {
     res.json(note)
@@ -26,7 +27,7 @@ notesRouter.get('/:id', async (req: Request, res: Response) => {
 
 notesRouter.post('/', folderExtractor, async (req: Request, res: Response) => {
   const body = req.body
-  const user = req.user
+  const user = req.user as UserDocument
   const folder = req.folder
 
   const note = new Note({
@@ -53,8 +54,8 @@ notesRouter.post('/', folderExtractor, async (req: Request, res: Response) => {
 })
 
 notesRouter.delete('/:id', async (req: Request, res: Response) => {
-  const user = req.user
-  const note = await Note.findById(req.params.id).populate('user').populate('folder')
+  const user = req.user as UserDocument
+  const note = await Note.findById(req.params.id).populate('user').populate('folder') as NoteDocument
 
   if (note.user.id !== user.id) {
     return res.status(403).json({ error: 'Unauthorized' })
@@ -62,13 +63,18 @@ notesRouter.delete('/:id', async (req: Request, res: Response) => {
 
   await Note.findByIdAndRemove(req.params.id)
 
-  user.notes = user.notes.pull(note.id)
-  await user.save()
+  await User.updateOne(
+    { _id: user.id },
+    { $pull: { notes: note.id.toString() }}
+  )
 
   if (note.folder) {
-    const folder = await Folder.findById(note.folder.id)
-    folder.notes = folder.notes.pull(note.id)
-    await folder.save()
+    const folder = await Folder.findById(note.folder.id) as FolderDocument
+
+    await Folder.updateOne(
+      { _id: folder.id },
+      { $pull: { notes: note.id.toString() }}
+    )
   }
 
   res.status(204).end()
@@ -76,10 +82,10 @@ notesRouter.delete('/:id', async (req: Request, res: Response) => {
 
 notesRouter.put('/:id', folderExtractor, async (req: Request, res: Response) => {
   const body = req.body
-  const user = req.user
+  const user = req.user as UserDocument
   const newFolder = req.folder
 
-  const note = await Note.findById(req.params.id).populate('user').populate('folder')
+  const note = await Note.findById(req.params.id).populate('user').populate('folder') as NoteDocument
   const currentFolder = note.folder ? await Folder.findById(note.folder.id).populate('notes') : null
 
   if (note.user.id !== user.id) {
@@ -94,12 +100,14 @@ notesRouter.put('/:id', folderExtractor, async (req: Request, res: Response) => 
     entries: body.entries,
   }
 
-  const updatedNote = await Note.findByIdAndUpdate(req.params.id, newNote, { new: true })
+  const updatedNote = await Note.findByIdAndUpdate(req.params.id, newNote, { new: true }) as NoteDocument
 
   if (newFolder) {
     if (currentFolder && newFolder.id !== currentFolder.id) {
-      currentFolder.notes = currentFolder.notes.pull(updatedNote._id)
-      await currentFolder.save()
+      await Folder.updateOne(
+        { _id: currentFolder.id },
+        { $pull: { notes: updatedNote._id.toString() }}
+      )
 
       newFolder.notes = newFolder.notes.concat(updatedNote._id)
       await newFolder.save()
@@ -109,8 +117,10 @@ notesRouter.put('/:id', folderExtractor, async (req: Request, res: Response) => 
     }
   } else {
     if (currentFolder) {
-      currentFolder.notes = currentFolder.notes.pull(updatedNote._id)
-      await currentFolder.save()
+      await Folder.updateOne(
+        { _id: currentFolder.id },
+        { $pull: { notes: updatedNote._id.toString() } }
+      )
     }
   }
 

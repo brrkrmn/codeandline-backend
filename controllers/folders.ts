@@ -1,10 +1,11 @@
 import { Request, Response, Router } from 'express';
-import { Folder } from '../models/folder';
+import { Folder, FolderDocument } from '../models/folder';
+import { User, UserDocument } from '../models/user';
 
 const foldersRouter = Router();
 
 foldersRouter.get('/', async (req: Request, res: Response) => {
-  const user = req.user
+  const user = req.user as UserDocument
   const userFolders = await Folder
     .find({ user: user._id }).populate('user').populate('notes')
 
@@ -12,8 +13,8 @@ foldersRouter.get('/', async (req: Request, res: Response) => {
 })
 
 foldersRouter.get('/:id', async (req: Request, res: Response) => {
-  const folder = await Folder.findById(req.params.id).populate('user').populate('notes')
-  const user = req.user
+  const folder = await Folder.findById(req.params.id).populate('user').populate('notes') as FolderDocument
+  const user = req.user as UserDocument
 
   if (folder.user.id === user.id) {
     res.json(folder)
@@ -24,7 +25,7 @@ foldersRouter.get('/:id', async (req: Request, res: Response) => {
 
 foldersRouter.post('/', async (req: Request, res: Response) => {
   const body = req.body
-  const user = req.user
+  const user = req.user as UserDocument
 
   const folder = new Folder({
     title: body.title,
@@ -42,8 +43,8 @@ foldersRouter.post('/', async (req: Request, res: Response) => {
 })
 
 foldersRouter.delete('/:id', async (req: Request, res: Response) => {
-  const user = req.user
-  const folder = await Folder.findById(req.params.id).populate('user')
+  const user = req.user as UserDocument
+  const folder = await Folder.findById(req.params.id).populate('user') as FolderDocument
 
   if (folder.user.id !== user.id) {
     return res.status(403).json({ error: 'Unauthorized' })
@@ -51,16 +52,18 @@ foldersRouter.delete('/:id', async (req: Request, res: Response) => {
 
   await Folder.findByIdAndRemove(req.params.id)
 
-  user.folders = user.folders.pull(folder.id)
-  await user.save()
+  await User.updateOne(
+    { _id: user.id },
+    { $pull: { folders: folder.id.toString() }}
+  )
 
   res.status(204).end()
 })
 
 foldersRouter.put('/:id', async (req: Request, res: Response) => {
   const body = req.body
-  const user = req.user
-  const folder = await Folder.findById(req.params.id).populate('user')
+  const user = req.user as UserDocument
+  const folder = await Folder.findById(req.params.id).populate('user') as FolderDocument
 
   if (folder.user.id !== user.id) {
     return res.status(403).json({ error: 'Unauthorized' })

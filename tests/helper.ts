@@ -1,7 +1,7 @@
 import * as bcrypt from 'bcrypt'
-import Folder from '../models/folder'
-import Note from '../models/note'
-import User from '../models/user'
+import { Folder } from '../models/folder'
+import { Note } from '../models/note'
+import { User, UserDocument } from '../models/user'
 
 export const initializeUser = async () => {
   const passwordHash = await bcrypt.hash('firstPassword', 10)
@@ -14,13 +14,13 @@ export const initializeUser = async () => {
   return savedUser
 }
 
-export const isUserInDB = async (username) => {
+export const isUserInDB = async (username: string) => {
   const user = await User.find({ username: username })
   if (user) return true; else false
 }
 
 export const initializeFolder = async () => {
-  const user = await User.findOne({})
+  const user = await User.findOne({}) as UserDocument
   const firstFolder = new Folder({
     title: 'firstFolder',
     description: 'firstFolderDescription',
@@ -30,7 +30,7 @@ export const initializeFolder = async () => {
 }
 
 export const initializeNote = async () => {
-  const user = await User.findOne({})
+  const user = await User.findOne({}) as UserDocument
   const firstNote = new Note({
     title: 'firstNote',
     description: 'firstNoteDescription',

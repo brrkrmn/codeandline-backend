@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
-import supertest from 'supertest'
+import supertest, { Response } from 'supertest'
 import app from '../../app'
-import User from '../../models/user'
+import { User } from '../../models/user'
 import { clearDB, initializeUser } from '../helper'
 
 const api = supertest(app)
@@ -17,7 +17,7 @@ describe('login', () => {
   })
 
   describe('with correct username and password', () => {
-    let response
+    let response: Response
 
     beforeEach(async () => {
       const user = {

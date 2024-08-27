@@ -1,14 +1,14 @@
 import mongoose from 'mongoose'
 import supertest from 'supertest'
 import app from '../../app'
-import Folder from '../../models/folder'
+import { Folder, FolderDocument } from '../../models/folder'
+import { User, UserDocument } from '../../models/user'
 import { clearDB, initializeFolder, initializeUser } from '../helper'
 
 const api = supertest(app)
 
 describe('authenticated user', () => {
-  let token
-  let firstFolder
+  let token: string
 
   beforeEach(async () => {
     await initializeUser()
@@ -22,7 +22,6 @@ describe('authenticated user', () => {
       })
 
     token = response.body.token
-    firstFolder = await Folder.findOne({})
   })
 
   afterEach(async () => {
@@ -40,6 +39,8 @@ describe('authenticated user', () => {
   })
 
   test('succeeds to view folder details', async () => {
+    const firstFolder = await Folder.findOne({}) as FolderDocument
+
     const response = await api
       .get(`/api/folders/${firstFolder.id}`)
       .set('Authorization', `Bearer ${token}`)
@@ -61,13 +62,20 @@ describe('authenticated user', () => {
   })
 
   test('succeds to delete folder', async () => {
+    const firstFolder = await Folder.findOne({}) as FolderDocument
+
     await api
       .delete(`/api/folders/${firstFolder.id}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(204)
+
+    const user = await User.findOne({}) as UserDocument
+    expect(user.folders).toHaveLength(0)
   })
 
   test('succeeds to edit folder', async () => {
+    const firstFolder = await Folder.findOne({}) as FolderDocument
+
     await api
       .put(`/api/folders/${firstFolder.id}`)
       .set('Authorization', `Bearer ${token}`)

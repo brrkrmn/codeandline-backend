@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 import supertest from 'supertest'
 import app from '../../app'
-import User from '../../models/user'
+import { User } from '../../models/user'
 import { clearDB, initializeUser, isUserInDB } from '../helper'
 
 const api = supertest(app)
@@ -29,7 +29,7 @@ describe('signup', () => {
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
-    expect(await isUserInDB(createdUser.username)).toBeTruthy
+    expect(await isUserInDB(createdUser.body.username)).toBeTruthy
   })
 
   test('fails with an existing email', async () => {

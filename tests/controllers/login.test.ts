@@ -1,19 +1,19 @@
-const mongoose = require('mongoose')
-const supertest = require('supertest')
-const helper = require('../helper')
-const app = require('../../app')
-const User = require('../../models/user')
+import mongoose from 'mongoose'
+import supertest from 'supertest'
+import app from '../../app'
+import User from '../../models/user'
+import { clearDB, initializeUser } from '../helper'
 
 const api = supertest(app)
 
 describe('login', () => {
   beforeEach(async () => {
     await User.deleteMany({})
-    await helper.initializeUser()
+    await initializeUser()
   })
 
   afterEach(async () => {
-    await helper.clearDB()
+    await clearDB()
   })
 
   describe('with correct username and password', () => {

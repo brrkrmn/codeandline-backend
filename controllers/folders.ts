@@ -1,5 +1,7 @@
-const foldersRouter = require('express').Router()
-const Folder = require('../models/folder')
+import { Router } from 'express';
+import Folder from '../models/folder';
+
+const foldersRouter = Router();
 
 foldersRouter.get('/', async (request, response) => {
   const user = request.user
@@ -73,4 +75,4 @@ foldersRouter.put('/:id', async (request, response) => {
   response.status(200).json(updatedFolder)
 })
 
-module.exports = foldersRouter
+export default foldersRouter

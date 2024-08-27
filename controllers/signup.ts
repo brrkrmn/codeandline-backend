@@ -1,6 +1,8 @@
-const bcrypt = require('bcrypt');
-const signupRouter = require('express').Router()
-const User = require('../models/user')
+import * as bcrypt from 'bcrypt';
+import { Router } from 'express';
+import User from '../models/user';
+
+const signupRouter = Router()
 
 signupRouter.post('/', async (request, response) => {
   const { email, username, password } = request.body
@@ -30,4 +32,4 @@ signupRouter.post('/', async (request, response) => {
   response.status(201).json(savedUser)
 })
 
-module.exports = signupRouter;
+export default signupRouter;

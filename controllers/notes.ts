@@ -1,7 +1,9 @@
-const notesRouter = require('express').Router()
-const Note = require('../models/note')
-const { folderExtractor } = require('../utils/middleware')
-const Folder = require('../models/folder')
+import { Router } from 'express';
+import Folder from '../models/folder';
+import Note from '../models/note';
+import { folderExtractor } from '../utils/middleware';
+
+const notesRouter = Router();
 
 notesRouter.get('/', async (request, response) => {
   const user = request.user
@@ -115,4 +117,4 @@ notesRouter.put('/:id', folderExtractor, async (request, response) => {
   response.status(200).json(updatedNote)
 })
 
-module.exports = notesRouter
+export default notesRouter

@@ -22,14 +22,20 @@
     "mongoose-unique-validator": "^4.0.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/mongoose-unique-validator": "^1.0.9",
+    "@types/supertest": "^6.0.2",
     "cross-env": "^7.0.3",
     "jest": "^29.7.0",
     "nodemon": "^3.0.3",
     "supertest": "^6.3.4"
   },
   "jest": {
-   "testEnvironment": "node",
-   "globalTeardown": "./tests/teardown.js",
-   "testTimeout": 100000
- }
+    "testEnvironment": "node",
+    "globalTeardown": "./tests/teardown.js",
+    "testTimeout": 100000
+  }
 }

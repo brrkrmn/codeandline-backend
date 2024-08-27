@@ -1,6 +1,16 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
-const folderSchema = new mongoose.Schema({
+const entrySchema = new mongoose.Schema({
+  lineNumbers: {
+    type: Array,
+  },
+  content: {
+    type: String,
+    required: true,
+  }
+})
+
+const noteSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true
@@ -16,17 +26,25 @@ const folderSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  notes: [{
+  code: {
+    type: String,
+    required: true,
+  },
+  entries: {
+    type: [entrySchema]
+  },
+  folder: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Note'
-  }],
+    ref: 'Folder',
+    default: null,
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
   }
 })
 
-folderSchema.set('toJSON', {
+noteSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
@@ -34,4 +52,4 @@ folderSchema.set('toJSON', {
   }
 })
 
-module.exports = mongoose.model('Folder', folderSchema)
+export default mongoose.model('Note', noteSchema)

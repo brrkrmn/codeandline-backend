@@ -1,20 +1,21 @@
-const mongoose = require('mongoose')
-const supertest = require('supertest')
-const helper = require('./helper')
-const app = require('../app')
-const Note = require('../models/note')
-const Folder = require('../models/folder')
+import mongoose from 'mongoose'
+import supertest from 'supertest'
+import app from '../app'
+import Folder from '../models/folder'
+import Note from '../models/note'
+import { clearDB, createNewUser, initializeFolder, initializeNote, initializeUser } from './helper'
+
 const api = supertest(app)
 
 describe('user', () => {
   beforeEach(async () => {
-    await helper.initializeUser()
-    await helper.initializeFolder()
-    await helper.initializeNote()
+    await initializeUser()
+    await initializeFolder()
+    await initializeNote()
   })
 
   afterEach(async () => {
-    await helper.clearDB()
+    await clearDB()
   })
 
   describe('with no token', () => {
@@ -52,7 +53,7 @@ describe('user', () => {
     let firstFolder
 
     beforeEach(async () => {
-      await helper.createNewUser()
+      await createNewUser()
 
       const response = await api
         .post('/api/login')
@@ -67,7 +68,7 @@ describe('user', () => {
     })
 
     afterEach(async () => {
-      await helper.clearDB()
+      await clearDB()
     })
 
     const checkUnauthorizedAccess = async (method, url) => {

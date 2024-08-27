@@ -1,9 +1,9 @@
-const mongoose = require('mongoose')
-const supertest = require('supertest')
-const helper = require('../helper')
-const app = require('../../app')
-const Note = require('../../models/note')
-const Folder = require('../../models/folder')
+import mongoose from 'mongoose'
+import supertest from 'supertest'
+import app from '../../app'
+import Folder from '../../models/folder'
+import Note from '../../models/note'
+import { clearDB, initializeFolder, initializeNote, initializeUser } from '../helper'
 
 const api = supertest(app)
 
@@ -13,9 +13,9 @@ describe('authenticated user', () => {
   let firstFolder
 
   beforeEach(async () => {
-    await helper.initializeUser()
-    await helper.initializeNote()
-    await helper.initializeFolder()
+    await initializeUser()
+    await initializeNote()
+    await initializeFolder()
 
     const response = await api
       .post('/api/login')
@@ -30,7 +30,7 @@ describe('authenticated user', () => {
   })
 
   afterEach(async () => {
-    await helper.clearDB()
+    await clearDB()
   })
 
   test('succeeds to view all notes', async () => {
@@ -103,9 +103,9 @@ describe('folders are correctly updated', () => {
   let firstFolder
 
   beforeEach(async () => {
-    await helper.initializeUser()
-    await helper.initializeNote()
-    await helper.initializeFolder()
+    await initializeUser()
+    await initializeNote()
+    await initializeFolder()
 
     const response = await api
       .post('/api/login')
@@ -126,7 +126,7 @@ describe('folders are correctly updated', () => {
   })
 
   afterEach(async () => {
-    await helper.clearDB()
+    await clearDB()
   })
   test('after note deletion', async () => {
     await api

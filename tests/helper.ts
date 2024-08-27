@@ -1,9 +1,9 @@
-const User = require('../models/user')
-const Folder = require('../models/folder')
-const Note = require('../models/note')
-const bcrypt = require('bcrypt')
+import * as bcrypt from 'bcrypt'
+import Folder from '../models/folder'
+import Note from '../models/note'
+import User from '../models/user'
 
-const initializeUser = async () => {
+export const initializeUser = async () => {
   const passwordHash = await bcrypt.hash('firstPassword', 10)
   const firstUser = new User({
     username: 'firstUser',
@@ -14,12 +14,12 @@ const initializeUser = async () => {
   return savedUser
 }
 
-const isUserInDB = async (username) => {
+export const isUserInDB = async (username) => {
   const user = await User.find({ username: username })
   if (user) return true; else false
 }
 
-const initializeFolder = async () => {
+export const initializeFolder = async () => {
   const user = await User.findOne({})
   const firstFolder = new Folder({
     title: 'firstFolder',
@@ -29,7 +29,7 @@ const initializeFolder = async () => {
   await firstFolder.save()
 }
 
-const initializeNote = async () => {
+export const initializeNote = async () => {
   const user = await User.findOne({})
   const firstNote = new Note({
     title: 'firstNote',
@@ -46,7 +46,7 @@ const initializeNote = async () => {
   await firstNote.save()
 }
 
-const createNewUser = async () => {
+export const createNewUser = async () => {
   const passwordHash = await bcrypt.hash('newPassword', 10)
   const newUser = new User({
     username: 'newUser',
@@ -57,12 +57,8 @@ const createNewUser = async () => {
   return savedUser
 }
 
-const clearDB = async () => {
+export const clearDB = async () => {
   await Folder.deleteMany({})
   await Note.deleteMany({})
   await User.deleteMany({})
-}
-
-module.exports = {
-  initializeUser, isUserInDB, initializeFolder, initializeNote, createNewUser, clearDB
 }

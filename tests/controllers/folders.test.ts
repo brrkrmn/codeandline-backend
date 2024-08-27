@@ -1,8 +1,8 @@
-const mongoose = require('mongoose')
-const supertest = require('supertest')
-const helper = require('../helper')
-const app = require('../../app')
-const Folder = require('../../models/folder')
+import mongoose from 'mongoose'
+import supertest from 'supertest'
+import app from '../../app'
+import Folder from '../../models/folder'
+import { clearDB, initializeFolder, initializeUser } from '../helper'
 
 const api = supertest(app)
 
@@ -11,8 +11,8 @@ describe('authenticated user', () => {
   let firstFolder
 
   beforeEach(async () => {
-    await helper.initializeUser()
-    await helper.initializeFolder()
+    await initializeUser()
+    await initializeFolder()
 
     const response = await api
       .post('/api/login')
@@ -26,7 +26,7 @@ describe('authenticated user', () => {
   })
 
   afterEach(async () => {
-    await helper.clearDB()
+    await clearDB()
   })
 
   test('succeeds to view all folders', async () => {

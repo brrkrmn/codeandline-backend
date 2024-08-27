@@ -1,19 +1,19 @@
-const User = require('../models/user')
-const Folder = require('../models/folder')
-const jwt = require('jsonwebtoken')
+import jwt from 'jsonwebtoken';
+import Folder from '../models/folder';
+import User from '../models/user';
 
-const requestLogger = (request, response, next) => {
+export const requestLogger = (request, response, next) => {
   console.log('Method', request.method);
   console.log('Path', request.path);
   console.log('Body', request.body);
   next();
 }
 
-const unknownEndpoint = (request, response) => {
+export const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
-const errorHandler = (error, request, response, next) => {
+export const errorHandler = (error, request, response, next) => {
   console.log('Error:', error.message);
 
   if (error.name === 'CastError') {
@@ -34,7 +34,7 @@ const errorHandler = (error, request, response, next) => {
   next(error);
 }
 
-const tokenExtractor = (request, response, next) => {
+export const tokenExtractor = (request, response, next) => {
   const authorization = request.get('authorization')
   if (authorization && authorization.startsWith('Bearer ')) {
       const token = authorization.replace('Bearer ', '')
@@ -43,7 +43,7 @@ const tokenExtractor = (request, response, next) => {
   next()
 }
 
-const userExtractor = async (request, response, next) => {
+export const userExtractor = async (request, response, next) => {
   if (!request.token) {
     return response.status(401).json({ error: 'token is missing'})
   }
@@ -59,7 +59,7 @@ const userExtractor = async (request, response, next) => {
   next()
 }
 
-const folderExtractor = async (request, response, next) => {
+export const folderExtractor = async (request, response, next) => {
   const folderId = request.body.folder
 
   if (folderId) {
@@ -69,13 +69,4 @@ const folderExtractor = async (request, response, next) => {
     request.folder = null
   }
   next()
-}
-
-module.exports = {
-  requestLogger,
-  unknownEndpoint,
-  errorHandler,
-  tokenExtractor,
-  userExtractor,
-  folderExtractor,
 }

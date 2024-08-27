@@ -1,12 +1,14 @@
 import mongoose from 'mongoose';
+import { NoteDocument } from './note';
+import { UserDocument } from './user';
 
 export type FolderDocument = mongoose.Document & {
   title: string;
   description?: string;
   date: Date;
   public: boolean;
-  notes: mongoose.Schema.Types.ObjectId[];
-  user: mongoose.Schema.Types.ObjectId;
+  notes: NoteDocument[];
+  user: UserDocument;
 }
 
 const folderSchema = new mongoose.Schema<FolderDocument>({

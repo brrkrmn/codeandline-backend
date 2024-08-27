@@ -1,12 +1,14 @@
 import mongoose from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
+import { FolderDocument } from './folder';
+import { NoteDocument } from './note';
 
 export type UserDocument = mongoose.Document & {
   email: string;
   username: string;
   passwordHash: string;
-  notes: mongoose.Schema.Types.ObjectId[];
-  folders: mongoose.Schema.Types.ObjectId[];
+  notes: NoteDocument[];
+  folders: FolderDocument[];
 };
 
 const userSchema = new mongoose.Schema<UserDocument>({

@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import { FolderDocument } from './folder';
+import { UserDocument } from './user';
 
 export type EntryDocument = mongoose.Document & {
   lineNumbers?: number[];
@@ -12,8 +14,8 @@ export type NoteDocument = mongoose.Document & {
   public: boolean;
   code: string;
   entries: EntryDocument[];
-  folder?: mongoose.Schema.Types.ObjectId | null;
-  user: mongoose.Schema.Types.ObjectId;
+  folder?: FolderDocument | null;
+  user: UserDocument;
 }
 
 const entrySchema = new mongoose.Schema<EntryDocument>({

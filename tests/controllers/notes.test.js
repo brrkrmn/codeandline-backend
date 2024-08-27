@@ -97,6 +97,87 @@ describe('authenticated user', () => {
   })
 })
 
+describe('folders are correctly updated', () => {
+  let token
+  let firstNote
+  let firstFolder
+
+  beforeEach(async () => {
+    await helper.initializeUser()
+    await helper.initializeNote()
+    await helper.initializeFolder()
+
+    const response = await api
+      .post('/api/login')
+      .send({
+        username: 'firstUser',
+        password: 'firstPassword'
+      })
+
+    token = response.body.token
+    firstNote = await Note.findOne({})
+    firstFolder = await Folder.findOne({ title: 'firstFolder' })
+
+    firstNote.folder = firstFolder.id
+    await firstNote.save()
+
+    firstFolder.notes = firstFolder.notes.concat(firstNote.id)
+    await firstFolder.save()
+  })
+
+  afterEach(async () => {
+    await helper.clearDB()
+  })
+  test('after note deletion', async () => {
+    await api
+      .delete(`/api/notes/${firstNote.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(204)
+
+    const updatedFolder = await Folder.findOne({})
+    expect(updatedFolder.notes).toHaveLength(0)
+  })
+
+  test("after changing note's folder", async () => {
+    const response = await api
+      .post('/api/folders')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: 'newFolder',
+      })
+
+    await api
+      .put(`/api/notes/${firstNote.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ folder: response.body.id })
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const updatedNote = await Note.findOne({})
+    const updatedNewFolder = await Folder.findOne({ title: 'newFolder' })
+    const updatedFirstFolder = await Folder.findOne({ title: 'firstFolder' })
+
+    expect(updatedNote.folder.toString()).toEqual(updatedNewFolder.id.toString())
+    expect(updatedNewFolder.notes).toHaveLength(1)
+    expect(updatedFirstFolder.notes).toHaveLength(0)
+  })
+
+  test("after removing note's folder", async () => {
+    await api
+      .put(`/api/notes/${firstNote.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ folder: null })
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const updatedNote = await Note.findOne({})
+    const updatedFolder = await Folder.findOne({})
+
+    expect(updatedNote.folder).toBeNull()
+    expect(updatedFolder.notes).toHaveLength(0)
+  })
+})
+
 afterAll(async () => {
   await mongoose.connection.close()
 })

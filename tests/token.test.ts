@@ -1,11 +1,14 @@
 import mongoose from 'mongoose'
-import supertest from 'supertest'
+import supertest, { Response } from 'supertest'
 import app from '../app'
-import Folder from '../models/folder'
-import Note from '../models/note'
+import { Folder, FolderDocument } from '../models/folder'
+import { Note, NoteDocument } from '../models/note'
 import { clearDB, createNewUser, initializeFolder, initializeNote, initializeUser } from './helper'
 
 const api = supertest(app)
+
+type Method = 'get' | 'post' | 'put' | 'delete'
+
 
 describe('user', () => {
   beforeEach(async () => {
@@ -19,15 +22,15 @@ describe('user', () => {
   })
 
   describe('with no token', () => {
-    const checkAccessWithNoToken = async (method, url) => {
+    const checkAccessWithNoToken = async (method: Method, url: string) => {
       await api[method](url)
         .expect(401)
         .expect('Content-Type', /application\/json/)
-        .then(res => expect(res.body.error).toContain('token is missing'))
+        .then((res: Response) => expect(res.body.error).toContain('token is missing'))
     }
 
     test('fails to access folder routes', async () => {
-      const firstFolder = await Folder.findOne({})
+      const firstFolder = await Folder.findOne({}) as FolderDocument
 
       checkAccessWithNoToken('get', '/api/folders')
       checkAccessWithNoToken('post', '/api/folders')
@@ -37,7 +40,7 @@ describe('user', () => {
     })
 
     test('fails to access note routes', async () => {
-      const firstNote = await Note.findOne({})
+      const firstNote = await Note.findOne({}) as NoteDocument
 
       checkAccessWithNoToken('get', '/api/notes')
       checkAccessWithNoToken('post', '/api/notes')
@@ -48,9 +51,9 @@ describe('user', () => {
   })
 
   describe('with non-matching token', () => {
-    let token
-    let firstNote
-    let firstFolder
+    let token: string
+    let firstNote: NoteDocument
+    let firstFolder: FolderDocument
 
     beforeEach(async () => {
       await createNewUser()
@@ -63,20 +66,20 @@ describe('user', () => {
         })
 
       token = response.body.token
-      firstFolder = await Folder.findOne({})
-      firstNote = await Note.findOne({})
+      firstFolder = await Folder.findOne({}) as FolderDocument
+      firstNote = await Note.findOne({}) as NoteDocument
     })
 
     afterEach(async () => {
       await clearDB()
     })
 
-    const checkUnauthorizedAccess = async (method, url) => {
+    const checkUnauthorizedAccess = async (method: Method, url: string) => {
       await api[method](url)
         .set('Authorization', `Bearer ${token}`)
         .expect(403)
         .expect('Content-Type', /application\/json/)
-        .then(res => expect(res.body.error).toContain('Unauthorized'));
+        .then((res: Response) => expect(res.body.error).toContain('Unauthorized'));
     };
 
     test('fails to view folder details', async () => {

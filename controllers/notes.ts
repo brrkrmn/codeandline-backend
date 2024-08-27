@@ -1,33 +1,33 @@
-import { Router } from 'express';
-import Folder from '../models/folder';
-import Note from '../models/note';
+import { Request, Response, Router } from 'express';
+import { Folder } from '../models/folder';
+import { Note } from '../models/note';
 import { folderExtractor } from '../utils/middleware';
 
 const notesRouter = Router();
 
-notesRouter.get('/', async (request, response) => {
-  const user = request.user
+notesRouter.get('/', async (req: Request, res: Response) => {
+  const user = req.user
   const userNotes = await Note
     .find({ user: user._id }).populate('user').populate('folder')
 
-  response.json(userNotes)
+  res.json(userNotes)
 })
 
-notesRouter.get('/:id', async (request, response) => {
-  const note = await Note.findById(request.params.id).populate('user').populate('folder')
-  const user = request.user
+notesRouter.get('/:id', async (req: Request, res: Response) => {
+  const note = await Note.findById(req.params.id).populate('user').populate('folder')
+  const user = req.user
 
   if (note.user.id === user.id) {
-    response.json(note)
+    res.json(note)
   } else {
-    response.status(403).json({ error: 'Unauthorized' })
+    res.status(403).json({ error: 'Unauthorized' })
   }
 })
 
-notesRouter.post('/', folderExtractor, async (request, response) => {
-  const body = request.body
-  const user = request.user
-  const folder = request.folder
+notesRouter.post('/', folderExtractor, async (req: Request, res: Response) => {
+  const body = req.body
+  const user = req.user
+  const folder = req.folder
 
   const note = new Note({
     title: body.title,
@@ -49,18 +49,18 @@ notesRouter.post('/', folderExtractor, async (request, response) => {
     await folder.save()
   }
 
-  response.status(201).json(savedNote)
+  res.status(201).json(savedNote)
 })
 
-notesRouter.delete('/:id', async (request, response) => {
-  const user = request.user
-  const note = await Note.findById(request.params.id).populate('user').populate('folder')
+notesRouter.delete('/:id', async (req: Request, res: Response) => {
+  const user = req.user
+  const note = await Note.findById(req.params.id).populate('user').populate('folder')
 
   if (note.user.id !== user.id) {
-    return response.status(403).json({ error: 'Unauthorized' })
+    return res.status(403).json({ error: 'Unauthorized' })
   }
 
-  await Note.findByIdAndRemove(request.params.id)
+  await Note.findByIdAndRemove(req.params.id)
 
   user.notes = user.notes.pull(note.id)
   await user.save()
@@ -71,19 +71,19 @@ notesRouter.delete('/:id', async (request, response) => {
     await folder.save()
   }
 
-  response.status(204).end()
+  res.status(204).end()
 })
 
-notesRouter.put('/:id', folderExtractor, async (request, response) => {
-  const body = request.body
-  const user = request.user
-  const newFolder = request.folder
+notesRouter.put('/:id', folderExtractor, async (req: Request, res: Response) => {
+  const body = req.body
+  const user = req.user
+  const newFolder = req.folder
 
-  const note = await Note.findById(request.params.id).populate('user').populate('folder')
+  const note = await Note.findById(req.params.id).populate('user').populate('folder')
   const currentFolder = note.folder ? await Folder.findById(note.folder.id).populate('notes') : null
 
   if (note.user.id !== user.id) {
-    return response.status(403).json({ error: 'Unauthorized' })
+    return res.status(403).json({ error: 'Unauthorized' })
   }
 
   const newNote = {
@@ -94,7 +94,7 @@ notesRouter.put('/:id', folderExtractor, async (request, response) => {
     entries: body.entries,
   }
 
-  const updatedNote = await Note.findByIdAndUpdate(request.params.id, newNote, { new: true })
+  const updatedNote = await Note.findByIdAndUpdate(req.params.id, newNote, { new: true })
 
   if (newFolder) {
     if (currentFolder && newFolder.id !== currentFolder.id) {
@@ -114,7 +114,7 @@ notesRouter.put('/:id', folderExtractor, async (request, response) => {
     }
   }
 
-  response.status(200).json(updatedNote)
+  res.status(200).json(updatedNote)
 })
 
 export default notesRouter

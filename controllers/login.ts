@@ -1,12 +1,12 @@
 import * as bcrypt from 'bcrypt';
-import { Router } from 'express';
+import { Request, Response, Router } from 'express';
 import * as jwt from 'jsonwebtoken';
-import User from '../models/user';
+import { User } from '../models/user';
 
 const loginRouter = Router();
 
-loginRouter.post('/', async (request, response) => {
-  const { username, password } = request.body
+loginRouter.post('/', async (req: Request, res: Response) => {
+  const { username, password } = req.body
   const user = await User.findOne({ username })
 
   const passwordCorrect = user === null
@@ -14,7 +14,7 @@ loginRouter.post('/', async (request, response) => {
     : await bcrypt.compare(password, user.passwordHash)
 
   if (!(user && passwordCorrect)) {
-    return response.status(401).send('Invalid username or password')
+    return res.status(401).send('Invalid username or password')
   }
 
   const userForToken = {
@@ -23,7 +23,7 @@ loginRouter.post('/', async (request, response) => {
   }
 
   const token = jwt.sign(userForToken, process.env.SECRET)
-  response.status(200).send({ token, username: user.username, email: user.email })
+  res.status(200).send({ token, username: user.username, email: user.email })
 })
 
 export default loginRouter

@@ -1,6 +1,24 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose';
+import { FolderDocument } from './folder';
+import { UserDocument } from './user';
 
-const entrySchema = new mongoose.Schema({
+export type EntryDocument = mongoose.Document & {
+  lineNumbers?: number[];
+  content: string;
+}
+
+export type NoteDocument = mongoose.Document & {
+  title: string;
+  description?: string;
+  date: Date;
+  public: boolean;
+  code: string;
+  entries: EntryDocument[];
+  folder?: FolderDocument | null;
+  user: UserDocument;
+}
+
+const entrySchema = new mongoose.Schema<EntryDocument>({
   lineNumbers: {
     type: Array,
   },
@@ -10,7 +28,7 @@ const entrySchema = new mongoose.Schema({
   }
 })
 
-const noteSchema = new mongoose.Schema({
+const noteSchema = new mongoose.Schema<NoteDocument>({
   title: {
     type: String,
     required: true
@@ -52,4 +70,4 @@ noteSchema.set('toJSON', {
   }
 })
 
-module.exports = mongoose.model('Note', noteSchema)
+export const Note = mongoose.model<NoteDocument>('Note', noteSchema)

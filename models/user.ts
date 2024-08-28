@@ -1,7 +1,17 @@
-const mongoose = require('mongoose')
-const uniqueValidator = require('mongoose-unique-validator')
+import mongoose from 'mongoose';
+import uniqueValidator from 'mongoose-unique-validator';
+import { FolderDocument } from './folder';
+import { NoteDocument } from './note';
 
-const userSchema = new mongoose.Schema({
+export type UserDocument = mongoose.Document & {
+  email: string;
+  username: string;
+  passwordHash: string;
+  notes: NoteDocument[];
+  folders: FolderDocument[];
+};
+
+const userSchema = new mongoose.Schema<UserDocument>({
   email: {
     type: String,
     unique: true,
@@ -36,4 +46,4 @@ userSchema.set('toJSON', {
   }
 })
 
-module.exports = mongoose.model('User', userSchema)
+export const User = mongoose.model<UserDocument>("User", userSchema);

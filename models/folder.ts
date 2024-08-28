@@ -1,6 +1,17 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose';
+import { NoteDocument } from './note';
+import { UserDocument } from './user';
 
-const folderSchema = new mongoose.Schema({
+export type FolderDocument = mongoose.Document & {
+  title: string;
+  description?: string;
+  date: Date;
+  public: boolean;
+  notes: NoteDocument[];
+  user: UserDocument;
+}
+
+const folderSchema = new mongoose.Schema<FolderDocument>({
   title: {
     type: String,
     required: true
@@ -34,4 +45,4 @@ folderSchema.set('toJSON', {
   }
 })
 
-module.exports = mongoose.model('Folder', folderSchema)
+export const Folder = mongoose.model<FolderDocument>('Folder', folderSchema);

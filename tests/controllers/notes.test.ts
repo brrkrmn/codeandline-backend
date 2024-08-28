@@ -1,21 +1,19 @@
-const mongoose = require('mongoose')
-const supertest = require('supertest')
-const helper = require('../helper')
-const app = require('../../app')
-const Note = require('../../models/note')
-const Folder = require('../../models/folder')
+import mongoose from 'mongoose'
+import supertest from 'supertest'
+import app from '../../app'
+import { Folder, FolderDocument } from '../../models/folder'
+import { Note, NoteDocument } from '../../models/note'
+import { clearDB, initializeFolder, initializeNote, initializeUser } from '../helper'
 
 const api = supertest(app)
 
 describe('authenticated user', () => {
-  let token
-  let firstNote
-  let firstFolder
+  let token: string
 
   beforeEach(async () => {
-    await helper.initializeUser()
-    await helper.initializeNote()
-    await helper.initializeFolder()
+    await initializeUser()
+    await initializeNote()
+    await initializeFolder()
 
     const response = await api
       .post('/api/login')
@@ -25,12 +23,10 @@ describe('authenticated user', () => {
       })
 
     token = response.body.token
-    firstNote = await Note.findOne({})
-    firstFolder = await Folder.findOne({})
   })
 
   afterEach(async () => {
-    await helper.clearDB()
+    await clearDB()
   })
 
   test('succeeds to view all notes', async () => {
@@ -44,6 +40,7 @@ describe('authenticated user', () => {
   })
 
   test('succeeds to view note details', async () => {
+    const firstNote = await Note.findOne({}) as NoteDocument
     const response = await api
       .get(`/api/notes/${firstNote.id}`)
       .set('Authorization', `Bearer ${token}`)
@@ -54,6 +51,8 @@ describe('authenticated user', () => {
   })
 
   test('succeeds to create note', async () => {
+    const firstFolder = await Folder.findOne({}) as FolderDocument
+
     await api
       .post('/api/notes')
       .set('Authorization', `Bearer ${token}`)
@@ -69,21 +68,25 @@ describe('authenticated user', () => {
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
-    const updatedFolder = await Folder.findOne({})
+    const updatedFolder = await Folder.findOne({}) as FolderDocument
     expect(updatedFolder.notes).toHaveLength(1)
   })
 
   test('succeeds to delete note', async () => {
+    const firstNote = await Note.findOne({}) as NoteDocument
     await api
       .delete(`/api/notes/${firstNote.id}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(204)
 
-    const updatedFolder = await Folder.findOne({})
+    const updatedFolder = await Folder.findOne({}) as FolderDocument
     expect(updatedFolder.notes).toHaveLength(0)
   })
 
   test('succeeds to edit note', async () => {
+    const firstNote = await Note.findOne({}) as NoteDocument
+    const firstFolder = await Folder.findOne({}) as FolderDocument
+
     await api
       .put(`/api/notes/${firstNote.id}`)
       .set('Authorization', `Bearer ${token}`)
@@ -92,20 +95,18 @@ describe('authenticated user', () => {
       .expect('Content-Type', /application\/json/)
       .then(res => expect(res.body.title).toContain('newTitle'));
 
-    const updatedFolder = await Folder.findOne({})
+    const updatedFolder = await Folder.findOne({}) as FolderDocument
     expect(updatedFolder.notes).toHaveLength(1)
   })
 })
 
 describe('folders are correctly updated', () => {
-  let token
-  let firstNote
-  let firstFolder
+  let token: string
 
   beforeEach(async () => {
-    await helper.initializeUser()
-    await helper.initializeNote()
-    await helper.initializeFolder()
+    await initializeUser()
+    await initializeNote()
+    await initializeFolder()
 
     const response = await api
       .post('/api/login')
@@ -114,9 +115,10 @@ describe('folders are correctly updated', () => {
         password: 'firstPassword'
       })
 
+    const firstNote = await Note.findOne({}) as NoteDocument
+    const firstFolder = await Folder.findOne({ title: 'firstFolder' }) as FolderDocument
+
     token = response.body.token
-    firstNote = await Note.findOne({})
-    firstFolder = await Folder.findOne({ title: 'firstFolder' })
 
     firstNote.folder = firstFolder.id
     await firstNote.save()
@@ -126,19 +128,24 @@ describe('folders are correctly updated', () => {
   })
 
   afterEach(async () => {
-    await helper.clearDB()
+    await clearDB()
   })
+
   test('after note deletion', async () => {
+    const firstNote = await Note.findOne({}) as NoteDocument
+
     await api
       .delete(`/api/notes/${firstNote.id}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(204)
 
-    const updatedFolder = await Folder.findOne({})
+    const updatedFolder = await Folder.findOne({}) as FolderDocument
     expect(updatedFolder.notes).toHaveLength(0)
   })
 
   test("after changing note's folder", async () => {
+    const firstNote = await Note.findOne({}) as NoteDocument
+
     const response = await api
       .post('/api/folders')
       .set('Authorization', `Bearer ${token}`)
@@ -153,16 +160,21 @@ describe('folders are correctly updated', () => {
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    const updatedNote = await Note.findOne({})
-    const updatedNewFolder = await Folder.findOne({ title: 'newFolder' })
-    const updatedFirstFolder = await Folder.findOne({ title: 'firstFolder' })
+    const updatedNote = await Note.findOne({}) as NoteDocument
+    const updatedNewFolder = await Folder.findOne({ title: 'newFolder' }) as FolderDocument
+    const updatedFirstFolder = await Folder.findOne({ title: 'firstFolder' }) as FolderDocument
 
-    expect(updatedNote.folder.toString()).toEqual(updatedNewFolder.id.toString())
+    if (updatedNote.folder) {
+      expect(updatedNote.folder.toString()).toEqual(updatedNewFolder.id.toString())
+    }
+
     expect(updatedNewFolder.notes).toHaveLength(1)
     expect(updatedFirstFolder.notes).toHaveLength(0)
   })
 
   test("after removing note's folder", async () => {
+    const firstNote = await Note.findOne({}) as NoteDocument
+
     await api
       .put(`/api/notes/${firstNote.id}`)
       .set('Authorization', `Bearer ${token}`)
@@ -170,8 +182,8 @@ describe('folders are correctly updated', () => {
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    const updatedNote = await Note.findOne({})
-    const updatedFolder = await Folder.findOne({})
+    const updatedNote = await Note.findOne({}) as NoteDocument
+    const updatedFolder = await Folder.findOne({}) as FolderDocument
 
     expect(updatedNote.folder).toBeNull()
     expect(updatedFolder.notes).toHaveLength(0)
